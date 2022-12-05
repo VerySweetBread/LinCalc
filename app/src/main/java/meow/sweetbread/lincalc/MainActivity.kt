@@ -184,7 +184,8 @@ class MainActivity : AppCompatActivity() {
             }
             else if (tokensType.containsKey(chr.toString())) {
                 if (tokens.isNotEmpty()) {
-                    if ((tokensType[chr.toString()]!! == Tokens.BracketOpen) and (tokens.last().type == Tokens.Number))
+                    if ((tokensType[chr.toString()]!! == Tokens.BracketOpen) and
+                        (tokens.last().type in arrayOf(Tokens.Number, Tokens.Variable)))
                         tokens += Token(Tokens.Operations, "*")
                     if ((chr == '-') and (tokens.last().type != Tokens.Number))
                         tokens += Token(Tokens.Number, 0.toDouble())
