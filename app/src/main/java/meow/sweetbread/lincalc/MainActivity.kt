@@ -317,30 +317,34 @@ class MainActivity : AppCompatActivity() {
                 when (token.value) {
                     "+" -> {
                         tmp_buf = buffer.dropLast(ext.size - position + 2)
-                        val res: Token =
-                            if ((first is Double) and (second is Double))
-                                Token(
-                                    Tokens.Number,
-                                    (first as Double + second as Double)
-                                )
-                            else if ((first is String) and (second is Double))
-                                Token(
-                                    Tokens.Linear,
-                                    Linear(first as String, second as Double, 0.0)
-                                )
-                            else if ((first is Linear) and (second is Double))
-                                Token(
-                                    Tokens.Linear, Linear(
-                                        (first as Linear).name,
-                                        (first as Linear).add + (second as Double),
-                                        (first as Linear).mul
-                                    )
-                                )
-                            else
-                                Token(
-                                    Tokens.Linear,
-                                    Linear(second as String, first as Double, 0.0)
-                                )
+                        val res: Token = when (first) {
+                            is Double -> {
+                                when (second) {
+                                    is Double -> { Token(Tokens.Number, (first + second)) }
+                                    is String -> { Token(Tokens.Linear, Linear(second, first, 1.0)) }
+                                    is Linear -> { Token(Tokens.Linear,
+                                        Linear(second.name, second.add + first, second.mul))
+                                    }
+                                    else -> {Token(Tokens.Error, "")}
+                                }
+                            }
+                            is String -> {
+                                when (second) {
+                                    is Double -> { Token(Tokens.Linear, Linear(first, second, 1.0)) }
+                                    else -> { Token(Tokens.Error, "") }
+                                }
+                            }
+                            is Linear -> {
+                                when (second) {
+                                    is Double -> { Token(Tokens.Linear,
+                                        Linear(first.name, first.add + second, first.mul))
+                                    }
+                                    else -> { Token(Tokens.Error, "") }
+                                }
+                            }
+                            else -> {Token(Tokens.Error, "")}
+                        }
+
                         tmp_buf += res
                         tmp_buf += buffer.drop(position + 1)
                     }
@@ -500,7 +504,8 @@ enum class Tokens {
     Constant,
     Variable,
     Linear,
-    Quadratic
+    Quadratic,
+    Error
 }
 
 class Token(val type: Tokens, val value: Any) {
